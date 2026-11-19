@@ -8,14 +8,16 @@ import { SpeedControls } from '@/components/simulation/SpeedControls';
 import { BlackHoleScene } from '@/components/scenes/blackhole/BlackHoleScene';
 import type { BlackHoleView } from '@/components/scenes/blackhole/CameraRig';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
-import { useSimulationClock } from '@/hooks/useSimulationClock';
-import { useFullscreen } from '@/hooks/useFullscreen';
-import { useSettingsStore } from '@/state/settingsStore';
+import { RangeControl } from '@/components/ui/RangeControl';
 import {
   DEFAULT_BLACK_HOLE_SETTINGS,
+  clampBlackHoleSettings,
   getBlackHoleTheme,
   type BlackHoleSettings,
 } from '@/sim/blackhole/config';
+import { useSimulationClock } from '@/hooks/useSimulationClock';
+import { useFullscreen } from '@/hooks/useFullscreen';
+import { useSettingsStore } from '@/state/settingsStore';
 import type { SimulationSpeed } from '@/lib/constants';
 
 export default function BlackHolePage() {
@@ -30,6 +32,10 @@ export default function BlackHolePage() {
   const { advance, reset, displayTime, timeRef } = useSimulationClock({ running, speed });
   const fullscreen = useFullscreen();
   const theme = getBlackHoleTheme(settings.themeId);
+
+  const updateSettings = (patch: Partial<BlackHoleSettings>) => {
+    setSettings((current) => clampBlackHoleSettings({ ...current, ...patch }));
+  };
 
   const handleReset = () => {
     reset();
@@ -93,6 +99,27 @@ export default function BlackHolePage() {
         controlsPanel={
           <Panel title="Playback & camera" eyebrow="Controls">
             <SpeedControls speed={speed} onChange={setSpeed} />
+            <div className="my-5 border-t border-white/8" />
+            <RangeControl
+              label="Disk intensity"
+              value={settings.intensity}
+              min={0.2}
+              max={2}
+              step={0.05}
+              format={(value) => `${value.toFixed(2)}x`}
+              onChange={(intensity) => updateSettings({ intensity })}
+            />
+            <div className="my-5" />
+            <RangeControl
+              label="Particle density"
+              value={settings.particleDensity}
+              min={0.25}
+              max={2}
+              step={0.05}
+              format={(value) => `${Math.round(value * 100)}%`}
+              onChange={(particleDensity) => updateSettings({ particleDensity })}
+              hint="Regenerates the disk with more or fewer particles."
+            />
             <div className="my-5 border-t border-white/8" />
             <SegmentedControl
               label="Camera preset"
