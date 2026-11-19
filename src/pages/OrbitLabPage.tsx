@@ -6,33 +6,27 @@ import { SimulationLayout } from '@/components/simulation/SimulationLayout';
 import { SimulationToolbar } from '@/components/simulation/SimulationToolbar';
 import { SpeedControls } from '@/components/simulation/SpeedControls';
 import { BodyEditor } from '@/components/simulation/BodyEditor';
+import { PresetSelector } from '@/components/simulation/PresetSelector';
 import { OrbitLabScene } from '@/components/scenes/orbit/OrbitLabScene';
 import { OrbitEngine } from '@/sim/orbit/engine';
 import { circularOrbitVelocity } from '@/sim/orbit/analysis';
 import { MAX_BODIES, type OrbitalBody } from '@/sim/orbit/types';
+import { ORBIT_PRESETS, findPreset, type SimulationPreset } from '@/sim/presets';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
 import type { SimulationSpeed } from '@/lib/constants';
 
-const INITIAL_BODIES: OrbitalBody[] = [
-  {
-    id: 'primary', name: 'Primary', mass: 240, radius: 0.75,
-    position: [0, 0, 0], velocity: [0, 0, 0], color: '#ffd8a8',
-  },
-  {
-    id: 'orbiter', name: 'Orbiter', mass: 1, radius: 0.24,
-    position: [7, 0, 0], velocity: [0, 0, circularOrbitVelocity(240, 7)], color: '#5299ff',
-  },
-];
+const INITIAL_PRESET = ORBIT_PRESETS[0];
 
 export default function OrbitLabPage() {
   const defaultSpeed = useSettingsStore((state) => state.defaultSpeed);
   const engineRef = useRef<OrbitEngine | null>(null);
-  if (!engineRef.current) engineRef.current = new OrbitEngine(INITIAL_BODIES);
+  if (!engineRef.current) engineRef.current = new OrbitEngine(INITIAL_PRESET.create());
   const engine = engineRef.current;
 
   const [version, setVersion] = useState(0);
-  const [selectedId, setSelectedId] = useState<string | null>('orbiter');
+  const [activePresetId, setActivePresetId] = useState<string | null>(INITIAL_PRESET.id);
+  const [selectedId, setSelectedId] = useState<string | null>(INITIAL_PRESET.create()[1]?.id ?? null);
   const [running, setRunning] = useState(true);
   const [speed, setSpeed] = useState<SimulationSpeed>(defaultSpeed);
   const [showTrails, setShowTrails] = useState(true);
@@ -47,8 +41,19 @@ export default function OrbitLabPage() {
   const selected = engine.bodies.find((body) => body.id === selectedId) ?? null;
 
   const handleReset = () => {
-    engine.reset(INITIAL_BODIES);
-    setSelectedId('orbiter');
+    const bodies = findPreset(ORBIT_PRESETS, activePresetId).create();
+    engine.reset(bodies);
+    setSelectedId(bodies[1]?.id ?? bodies[0]?.id ?? null);
+    setVersion((value) => value + 1);
+    setDisplayTime(0);
+    setRunning(true);
+  };
+
+  const applyPreset = (preset: SimulationPreset<OrbitalBody[]>) => {
+    const bodies = preset.create();
+    engine.reset(bodies);
+    setActivePresetId(preset.id);
+    setSelectedId(bodies[1]?.id ?? bodies[0]?.id ?? null);
     setVersion((value) => value + 1);
     setDisplayTime(0);
     setRunning(true);
@@ -69,6 +74,7 @@ export default function OrbitLabPage() {
       color: colors[index % colors.length],
     };
     if (engine.add(body)) {
+      setActivePresetId(null);
       setSelectedId(body.id);
       setVersion((value) => value + 1);
     }
@@ -134,7 +140,14 @@ export default function OrbitLabPage() {
           </Panel>
         }
         controlsPanel={
-          <Panel title="Body editor" eyebrow="Configuration">
+          <Panel title="Presets & bodies" eyebrow="Configuration">
+            <PresetSelector
+              label="Starting configuration"
+              presets={ORBIT_PRESETS}
+              activeId={activePresetId}
+              onApply={applyPreset}
+            />
+            <div className="my-5 border-t border-white/8" />
             <SpeedControls speed={speed} onChange={setSpeed} />
             <div className="my-5 border-t border-white/8" />
             <BodyEditor
@@ -142,7 +155,10 @@ export default function OrbitLabPage() {
               selectedId={selectedId}
               onSelect={setSelectedId}
               onAdd={addBody}
-              onChange={() => setVersion((value) => value + 1)}
+              onChange={() => {
+                setActivePresetId(null);
+                setVersion((value) => value + 1);
+              }}
             />
           </Panel>
         }

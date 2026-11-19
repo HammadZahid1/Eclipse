@@ -10,6 +10,7 @@ import type { BlackHoleView } from '@/components/scenes/blackhole/CameraRig';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { RangeControl } from '@/components/ui/RangeControl';
 import { ThemeSelector } from '@/components/simulation/ThemeSelector';
+import { PresetSelector } from '@/components/simulation/PresetSelector';
 import {
   BLACK_HOLE_THEMES,
   DEFAULT_BLACK_HOLE_SETTINGS,
@@ -17,6 +18,7 @@ import {
   getBlackHoleTheme,
   type BlackHoleSettings,
 } from '@/sim/blackhole/config';
+import { BLACK_HOLE_PRESETS, type SimulationPreset } from '@/sim/presets';
 import { useSimulationClock } from '@/hooks/useSimulationClock';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
@@ -31,17 +33,27 @@ export default function BlackHolePage() {
   const [resetToken, setResetToken] = useState(0);
   const [view, setView] = useState<BlackHoleView>('overview');
   const [settings, setSettings] = useState<BlackHoleSettings>(DEFAULT_BLACK_HOLE_SETTINGS);
+  const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const { advance, reset, displayTime, timeRef } = useSimulationClock({ running, speed });
   const fullscreen = useFullscreen();
   const theme = getBlackHoleTheme(settings.themeId);
 
   const updateSettings = (patch: Partial<BlackHoleSettings>) => {
+    setActivePresetId(null);
     setSettings((current) => clampBlackHoleSettings({ ...current, ...patch }));
+  };
+
+  const applyPreset = (preset: SimulationPreset<BlackHoleSettings>) => {
+    setSettings(preset.create());
+    setActivePresetId(preset.id);
+    setResetToken((token) => token + 1);
+    setRunning(true);
   };
 
   const handleReset = () => {
     reset();
     setSettings(DEFAULT_BLACK_HOLE_SETTINGS);
+    setActivePresetId(null);
     setResetToken((token) => token + 1);
     setRunning(true);
   };
@@ -99,7 +111,14 @@ export default function BlackHolePage() {
           </Panel>
         }
         controlsPanel={
-          <Panel title="Playback & camera" eyebrow="Controls">
+          <Panel title="Presets, playback & camera" eyebrow="Controls">
+            <PresetSelector
+              label="Disk preset"
+              presets={BLACK_HOLE_PRESETS}
+              activeId={activePresetId}
+              onApply={applyPreset}
+            />
+            <div className="my-5 border-t border-white/8" />
             <SpeedControls speed={speed} onChange={setSpeed} />
             <div className="my-5 border-t border-white/8" />
             <RangeControl

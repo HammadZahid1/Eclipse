@@ -6,6 +6,7 @@ import { DataRow } from '@/components/ui/DataRow';
 import { RangeControl } from '@/components/ui/RangeControl';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { ThemeSelector } from '@/components/simulation/ThemeSelector';
+import { PresetSelector } from '@/components/simulation/PresetSelector';
 import type { GalaxyType } from '@/types/simulation';
 import { SimulationLayout } from '@/components/simulation/SimulationLayout';
 import { SimulationToolbar } from '@/components/simulation/SimulationToolbar';
@@ -15,6 +16,7 @@ import { useSettingsStore } from '@/state/settingsStore';
 import { generateGalaxy } from '@/sim/galaxy/generator';
 import { GALAXY_PALETTES, getGalaxyPalette } from '@/sim/galaxy/palettes';
 import { createSeed, deriveSeed, normalizeSeed } from '@/sim/galaxy/seed';
+import { GALAXY_PRESETS, type SimulationPreset } from '@/sim/presets';
 import {
   DEFAULT_GALAXY_PARAMETERS,
   GALAXY_LIMITS,
@@ -28,6 +30,7 @@ export default function GalaxyPage() {
   const [running, setRunning] = useState(true);
   const [speed, setSpeed] = useState<SimulationSpeed>(defaultSpeed);
   const [parameters, setParameters] = useState<GalaxyParameters>(DEFAULT_GALAXY_PARAMETERS);
+  const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const [resetToken, setResetToken] = useState(0);
   const [generation, setGeneration] = useState(0);
   const fullscreen = useFullscreen();
@@ -35,11 +38,22 @@ export default function GalaxyPage() {
   const palette = getGalaxyPalette(parameters.paletteId);
 
   const updateParameters = (patch: Partial<GalaxyParameters>) => {
+    setActivePresetId(null);
     setParameters((current) => clampGalaxyParameters({ ...current, ...patch }));
+  };
+
+  const applyPreset = (preset: SimulationPreset<GalaxyParameters>) => {
+    setParameters(preset.create());
+    setActivePresetId(preset.id);
+    setGeneration(0);
+    setResetToken((token) => token + 1);
+    setSpeed(defaultSpeed);
+    setRunning(true);
   };
 
   const handleReset = () => {
     setParameters(DEFAULT_GALAXY_PARAMETERS);
+    setActivePresetId(null);
     setGeneration(0);
     setResetToken((token) => token + 1);
     setSpeed(defaultSpeed);
@@ -47,6 +61,7 @@ export default function GalaxyPage() {
   };
 
   const regenerate = () => {
+    setActivePresetId(null);
     setGeneration((current) => {
       const next = current + 1;
       setParameters((params) => ({ ...params, seed: deriveSeed(params.seed, next) }));
@@ -103,6 +118,13 @@ export default function GalaxyPage() {
         }
         controlsPanel={
           <Panel title="Generation" eyebrow="Parameters">
+            <PresetSelector
+              label="Starting structure"
+              presets={GALAXY_PRESETS}
+              activeId={activePresetId}
+              onApply={applyPreset}
+            />
+            <div className="my-5 border-t border-white/8" />
             <SegmentedControl
               label="Galaxy type"
               value={parameters.type}
