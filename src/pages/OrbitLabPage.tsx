@@ -35,6 +35,7 @@ export default function OrbitLabPage() {
   const [selectedId, setSelectedId] = useState<string | null>('orbiter');
   const [running, setRunning] = useState(true);
   const [speed, setSpeed] = useState<SimulationSpeed>(defaultSpeed);
+  const [showTrails, setShowTrails] = useState(true);
   const [displayTime, setDisplayTime] = useState(0);
   const fullscreen = useFullscreen();
 
@@ -92,6 +93,7 @@ export default function OrbitLabPage() {
             speed={speed}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            showTrails={showTrails}
           />
         }
         status={{ running, time: displayTime, speed, detail: `${engine.bodies.length} bodies · simplified gravity` }}
@@ -100,14 +102,14 @@ export default function OrbitLabPage() {
           <SimulationToolbar
             running={running}
             speed={speed}
-            showOrbits
+            showOrbits={showTrails}
             showLabels
             fullscreenSupported={fullscreen.supported}
             onToggleRunning={() => setRunning((value) => !value)}
             onReset={handleReset}
             onResetCamera={() => setVersion((value) => value + 1)}
             onSpeedChange={setSpeed}
-            onToggleOrbits={() => {}}
+            onToggleOrbits={() => setShowTrails((value) => !value)}
             onToggleLabels={() => {}}
             onFullscreen={fullscreen.toggle}
           />

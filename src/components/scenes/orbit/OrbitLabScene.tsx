@@ -7,6 +7,7 @@ import { RenderCanvas } from '@/components/three/RenderCanvas';
 import type { OrbitEngine } from '@/sim/orbit/engine';
 import { integrateSystem } from '@/sim/orbit/integration';
 import type { OrbitalBody } from '@/sim/orbit/types';
+import { Trajectories } from './Trajectories';
 
 interface OrbitLabSceneProps {
   engine: OrbitEngine;
@@ -15,6 +16,7 @@ interface OrbitLabSceneProps {
   speed: number;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  showTrails: boolean;
 }
 
 function BodyMesh({
@@ -71,7 +73,15 @@ function BodyMesh({
   );
 }
 
-function SceneContents({ engine, version, running, speed, selectedId, onSelect }: OrbitLabSceneProps) {
+function SceneContents({
+  engine,
+  version,
+  running,
+  speed,
+  selectedId,
+  onSelect,
+  showTrails,
+}: OrbitLabSceneProps) {
   const meshes = useRef<Record<string, THREE.Mesh | null>>({});
 
   useFrame((_, delta) => {
@@ -87,6 +97,7 @@ function SceneContents({ engine, version, running, speed, selectedId, onSelect }
       <StarField count={600} seed="orbit-lab" radius={100} rotationSpeed={0.001} />
       <ambientLight intensity={0.3} />
       <pointLight position={[6, 8, 6]} intensity={60} distance={40} />
+      <Trajectories engine={engine} version={version} visible={showTrails} />
       {engine.bodies.map((body) => (
         <BodyMesh
           key={`${body.id}-${version}`}
