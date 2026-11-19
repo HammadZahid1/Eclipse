@@ -7,3 +7,7 @@ export const SIMULATION_TIME_UNIT = 'simulation units';
 export const SIMULATION_SPEEDS = [0.25, 0.5, 1, 2, 5, 10] as const;
 
 export type SimulationSpeed = (typeof SIMULATION_SPEEDS)[number];
+
+export function isSimulationSpeed(value: number): value is SimulationSpeed {
+  return SIMULATION_SPEEDS.some((speed) => speed === value);
+}

@@ -10,6 +10,8 @@ import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
 import { PlanetSelector } from '@/components/simulation/PlanetSelector';
 import { PlanetInfoPanel } from '@/components/simulation/PlanetInfoPanel';
+import { SpeedControls } from '@/components/simulation/SpeedControls';
+import { useSimulationShortcuts } from '@/hooks/useSimulationShortcuts';
 import { PLANETS, SOLAR_SYSTEM_BOUNDS } from '@/sim/solar/data';
 import type { SimulationSpeed } from '@/lib/constants';
 
@@ -29,6 +31,12 @@ export default function SolarSystemPage() {
     reset();
     setResetToken((token) => token + 1);
   };
+
+  useSimulationShortcuts({
+    onToggleRunning: () => setRunning((value) => !value),
+    onReset: handleReset,
+    onSpeedChange: setSpeed,
+  });
 
   const selectedPlanet = PLANETS.find((planet) => planet.id === selectedId) ?? null;
 
@@ -103,6 +111,8 @@ export default function SolarSystemPage() {
         }
         controlsPanel={
           <Panel title="Body selection" eyebrow="Controls">
+            <SpeedControls speed={speed} onChange={setSpeed} />
+            <div className="my-5 border-t border-white/8" />
             <PlanetSelector
               selectedId={selectedId}
               onSelect={(id) => setSelectedId(id === '' ? null : id)}
