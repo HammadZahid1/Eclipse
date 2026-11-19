@@ -9,7 +9,9 @@ import { BlackHoleScene } from '@/components/scenes/blackhole/BlackHoleScene';
 import type { BlackHoleView } from '@/components/scenes/blackhole/CameraRig';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { RangeControl } from '@/components/ui/RangeControl';
+import { ThemeSelector } from '@/components/simulation/ThemeSelector';
 import {
+  BLACK_HOLE_THEMES,
   DEFAULT_BLACK_HOLE_SETTINGS,
   clampBlackHoleSettings,
   getBlackHoleTheme,
@@ -119,6 +121,27 @@ export default function BlackHolePage() {
               format={(value) => `${Math.round(value * 100)}%`}
               onChange={(particleDensity) => updateSettings({ particleDensity })}
               hint="Regenerates the disk with more or fewer particles."
+            />
+            <div className="my-5" />
+            <RangeControl
+              label="Disk rotation"
+              value={settings.rotationSpeed}
+              min={0}
+              max={2}
+              step={0.05}
+              format={(value) => `${value.toFixed(2)} rad/t`}
+              onChange={(rotationSpeed) => updateSettings({ rotationSpeed })}
+            />
+            <div className="my-5 border-t border-white/8" />
+            <ThemeSelector
+              label="Color theme"
+              themes={BLACK_HOLE_THEMES.map((item) => ({
+                id: item.id,
+                name: item.name,
+                colors: [item.inner, item.middle, item.outer],
+              }))}
+              value={settings.themeId}
+              onChange={(themeId) => updateSettings({ themeId })}
             />
             <div className="my-5 border-t border-white/8" />
             <SegmentedControl
