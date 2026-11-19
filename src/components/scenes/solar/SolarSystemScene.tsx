@@ -6,6 +6,7 @@ import { PLANETS } from '@/sim/solar/data';
 import { planetPosition } from '@/sim/solar/orbital';
 import { StarField } from '@/components/particles/StarField';
 import { RenderCanvas } from '@/components/three/RenderCanvas';
+import { Star } from './Star';
 
 interface SolarSystemSceneProps {
   advance: (delta: number, onStep: (step: number, time: number) => void) => void;
@@ -30,11 +31,7 @@ function SceneContents({ advance, resetToken }: SolarSystemSceneProps) {
     <>
       <StarField count={900} seed="solar-system" radius={110} rotationSpeed={0.002} />
       <ambientLight intensity={0.22} />
-      <pointLight position={[0, 0, 0]} intensity={90} distance={45} decay={2} color="#ffd8b0" />
-      <mesh>
-        <sphereGeometry args={[1.05, 48, 48]} />
-        <meshBasicMaterial color="#ffd8a8" />
-      </mesh>
+      <Star />
       {PLANETS.map((planet) => (
         <group
           key={`${planet.id}-${resetToken}`}
