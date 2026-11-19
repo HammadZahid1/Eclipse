@@ -63,4 +63,22 @@ describe('OrbitEngine', () => {
     expect(engine.bodies[0].mass).toBe(1000);
     expect(engine.bodies[0].radius).toBe(0.12);
   });
+
+  it('captures and restores isolated state snapshots', () => {
+    const engine = new OrbitEngine([central, satellite]);
+    const initial = engine.capture();
+    engine.step(0.5);
+
+    const snapshot = engine.capture();
+    expect(snapshot.time).toBeCloseTo(0.5);
+    expect(snapshot.bodies).not.toBe(engine.bodies);
+    expect(snapshot.bodies[1].position).not.toBe(engine.bodies[1].position);
+
+    snapshot.bodies[1].position[0] = 999;
+    engine.restore(initial);
+    expect(engine.time).toBe(0);
+    expect(engine.bodies[1].position[0]).toBe(6);
+    engine.step(0.01);
+    expect(engine.bodies[1].position[0]).toBeCloseTo(6, 2);
+  });
 });

@@ -8,6 +8,12 @@ import {
   type OrbitalBody,
 } from './types';
 
+/** Serializable state used for bounded stepping and undo. */
+export interface OrbitEngineSnapshot {
+  time: number;
+  bodies: OrbitalBody[];
+}
+
 /** Stateful N-body simulation using Velocity Verlet integration. */
 export class OrbitEngine {
   bodies: OrbitalBody[];
@@ -73,6 +79,33 @@ export class OrbitEngine {
   reset(bodies: readonly OrbitalBody[]): void {
     this.bodies = bodies.map((body) => clampBody(body));
     this.time = 0;
+    this.refreshAccelerations();
+  }
+
+  /** Returns an isolated copy of the current state. */
+  capture(): OrbitEngineSnapshot {
+    return {
+      time: this.time,
+      bodies: this.bodies.map((body) =>
+        clampBody({
+          ...body,
+          position: [...body.position] as MutableVec3,
+          velocity: [...body.velocity] as MutableVec3,
+        }),
+      ),
+    };
+  }
+
+  /** Replaces the current state with a previously captured snapshot. */
+  restore(snapshot: OrbitEngineSnapshot): void {
+    this.time = snapshot.time;
+    this.bodies = snapshot.bodies.map((body) =>
+      clampBody({
+        ...body,
+        position: [...body.position] as MutableVec3,
+        velocity: [...body.velocity] as MutableVec3,
+      }),
+    );
     this.refreshAccelerations();
   }
 

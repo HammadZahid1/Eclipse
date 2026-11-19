@@ -5,6 +5,7 @@ interface ShortcutHandlers {
   onToggleRunning: () => void;
   onReset: () => void;
   onSpeedChange: (speed: SimulationSpeed) => void;
+  onStep?: (direction: -1 | 1) => void;
 }
 
 const isTypingTarget = (target: EventTarget | null) => {
@@ -15,11 +16,12 @@ const isTypingTarget = (target: EventTarget | null) => {
   );
 };
 
-/** Keyboard shortcuts for playback and simulation speed. */
+/** Keyboard shortcuts for playback, stepping and simulation speed. */
 export function useSimulationShortcuts({
   onToggleRunning,
   onReset,
   onSpeedChange,
+  onStep,
 }: ShortcutHandlers) {
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -27,6 +29,12 @@ export function useSimulationShortcuts({
       if (event.code === 'Space') {
         event.preventDefault();
         onToggleRunning();
+      } else if (event.key === ',' && onStep) {
+        event.preventDefault();
+        onStep(-1);
+      } else if (event.key === '.' && onStep) {
+        event.preventDefault();
+        onStep(1);
       } else if (event.key.toLowerCase() === 'r') {
         onReset();
       } else if (/^[1-6]$/.test(event.key)) {
@@ -35,5 +43,5 @@ export function useSimulationShortcuts({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onReset, onSpeedChange, onToggleRunning]);
+  }, [onReset, onSpeedChange, onStep, onToggleRunning]);
 }

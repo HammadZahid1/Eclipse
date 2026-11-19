@@ -7,22 +7,30 @@ import { SimulationToolbar } from '@/components/simulation/SimulationToolbar';
 import { SpeedControls } from '@/components/simulation/SpeedControls';
 import { BodyEditor } from '@/components/simulation/BodyEditor';
 import { PresetSelector } from '@/components/simulation/PresetSelector';
+import { StepControls } from '@/components/simulation/StepControls';
 import { OrbitLabScene } from '@/components/scenes/orbit/OrbitLabScene';
-import { OrbitEngine } from '@/sim/orbit/engine';
-import { circularOrbitVelocity } from '@/sim/orbit/analysis';
+import { OrbitEngine, type OrbitEngineSnapshot } from '@/sim/orbit/engine';
+import { circularOrbitVelocity, totalEnergy, totalMomentum } from '@/sim/orbit/analysis';
 import { MAX_BODIES, type OrbitalBody } from '@/sim/orbit/types';
 import { ORBIT_PRESETS, findPreset, type SimulationPreset } from '@/sim/presets';
 import { useFullscreen } from '@/hooks/useFullscreen';
+import { useSimulationShortcuts } from '@/hooks/useSimulationShortcuts';
 import { useSettingsStore } from '@/state/settingsStore';
 import type { SimulationSpeed } from '@/lib/constants';
 
 const INITIAL_PRESET = ORBIT_PRESETS[0];
+const STEP_SIZE = 0.25;
+const SNAPSHOT_INTERVAL = 0.5;
+const HISTORY_LIMIT = 80;
 
 export default function OrbitLabPage() {
   const defaultSpeed = useSettingsStore((state) => state.defaultSpeed);
   const engineRef = useRef<OrbitEngine | null>(null);
   if (!engineRef.current) engineRef.current = new OrbitEngine(INITIAL_PRESET.create());
   const engine = engineRef.current;
+  const historyRef = useRef<OrbitEngineSnapshot[]>([]);
+  const lastRecordedTimeRef = useRef(0);
+  if (historyRef.current.length === 0) historyRef.current.push(engine.capture());
 
   const [version, setVersion] = useState(0);
   const [activePresetId, setActivePresetId] = useState<string | null>(INITIAL_PRESET.id);
@@ -34,15 +42,31 @@ export default function OrbitLabPage() {
   const fullscreen = useFullscreen();
 
   useEffect(() => {
-    const timer = window.setInterval(() => setDisplayTime(engine.time), 200);
+    const timer = window.setInterval(() => {
+      setDisplayTime(engine.time);
+      if (engine.time - lastRecordedTimeRef.current >= SNAPSHOT_INTERVAL) {
+        historyRef.current.push(engine.capture());
+        if (historyRef.current.length > HISTORY_LIMIT) historyRef.current.shift();
+        lastRecordedTimeRef.current = engine.time;
+      }
+    }, 200);
     return () => window.clearInterval(timer);
   }, [engine]);
 
   const selected = engine.bodies.find((body) => body.id === selectedId) ?? null;
+  const energy = totalEnergy(engine.bodies, engine.gravitationalConstant, engine.softening);
+  const momentum = totalMomentum(engine.bodies);
+  const momentumMagnitude = Math.hypot(...momentum);
+
+  const resetHistory = () => {
+    historyRef.current = [engine.capture()];
+    lastRecordedTimeRef.current = engine.time;
+  };
 
   const handleReset = () => {
     const bodies = findPreset(ORBIT_PRESETS, activePresetId).create();
     engine.reset(bodies);
+    resetHistory();
     setSelectedId(bodies[1]?.id ?? bodies[0]?.id ?? null);
     setVersion((value) => value + 1);
     setDisplayTime(0);
@@ -52,6 +76,7 @@ export default function OrbitLabPage() {
   const applyPreset = (preset: SimulationPreset<OrbitalBody[]>) => {
     const bodies = preset.create();
     engine.reset(bodies);
+    resetHistory();
     setActivePresetId(preset.id);
     setSelectedId(bodies[1]?.id ?? bodies[0]?.id ?? null);
     setVersion((value) => value + 1);
@@ -79,6 +104,30 @@ export default function OrbitLabPage() {
       setVersion((value) => value + 1);
     }
   };
+
+  const step = (direction: -1 | 1) => {
+    setRunning(false);
+    if (direction === 1) {
+      historyRef.current.push(engine.capture());
+      if (historyRef.current.length > HISTORY_LIMIT) historyRef.current.shift();
+      engine.step(STEP_SIZE);
+      lastRecordedTimeRef.current = engine.time;
+    } else {
+      const snapshot = historyRef.current.pop();
+      if (!snapshot) return;
+      engine.restore(snapshot);
+      lastRecordedTimeRef.current = engine.time;
+      setVersion((value) => value + 1);
+    }
+    setDisplayTime(engine.time);
+  };
+
+  useSimulationShortcuts({
+    onToggleRunning: () => setRunning((value) => !value),
+    onReset: handleReset,
+    onSpeedChange: setSpeed,
+    onStep: step,
+  });
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
@@ -133,6 +182,8 @@ export default function OrbitLabPage() {
                   <DataRow label="Velocity" value={selected.velocity.map((v) => v.toFixed(1)).join(', ')} />
                 </>
               )}
+              <DataRow label="Total energy" value={energy.toFixed(1)} />
+              <DataRow label="Net momentum" value={momentumMagnitude.toFixed(2)} />
             </dl>
             <p className="mt-4 text-[11px] leading-relaxed text-muted/70">
               Softened Newtonian gravity with Velocity Verlet integration. Not a complete physical model.
@@ -149,6 +200,12 @@ export default function OrbitLabPage() {
             />
             <div className="my-5 border-t border-white/8" />
             <SpeedControls speed={speed} onChange={setSpeed} />
+            <div className="my-5 border-t border-white/8" />
+            <StepControls
+              stepSize={STEP_SIZE}
+              canStepBack={historyRef.current.length > 0}
+              onStep={step}
+            />
             <div className="my-5 border-t border-white/8" />
             <BodyEditor
               engine={engine}
