@@ -1,4 +1,6 @@
-import type { ReactNode, RefObject } from 'react';
+import { useState, type ReactNode, type RefObject } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { SimulationStatusBar } from './SimulationStatusBar';
 import { PausedOverlay } from './PausedOverlay';
 
@@ -25,6 +27,8 @@ export function SimulationLayout({
   sceneRef,
   className = '',
 }: SimulationLayoutProps) {
+  const [mobileControlsOpen, setMobileControlsOpen] = useState(false);
+
   return (
     <div className={`flex flex-col gap-3 px-3 pb-3 sm:px-4 sm:pb-4 ${className}`}>
       <div className="flex min-h-[420px] flex-1 flex-col gap-3 lg:flex-row">
@@ -36,8 +40,25 @@ export function SimulationLayout({
           <PausedOverlay visible={!status.running} onResume={onResume ?? (() => {})} />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,transparent_45%,rgba(3,4,10,0.55))]" />
           <div className="pointer-events-auto absolute left-3 top-3 z-10 max-w-[calc(100%-1.5rem)]">{toolbar}</div>
+          <div className="pointer-events-auto absolute bottom-3 right-3 z-10 lg:hidden">
+            <Button
+              size="sm"
+              variant="secondary"
+              icon={<SlidersHorizontal size={14} />}
+              aria-expanded={mobileControlsOpen}
+              aria-controls="simulation-controls"
+              onClick={() => setMobileControlsOpen((open) => !open)}
+            >
+              {mobileControlsOpen ? 'Hide controls' : 'Controls'}
+            </Button>
+          </div>
         </section>
-        <aside className="ecl-scrollbar flex max-h-[460px] w-full flex-col gap-3 overflow-y-auto lg:max-h-none lg:w-[320px] xl:w-[350px]">
+        <aside
+          id="simulation-controls"
+          className={`ecl-scrollbar w-full flex-col gap-3 overflow-y-auto lg:flex lg:max-h-none lg:w-[320px] xl:w-[350px] ${
+            mobileControlsOpen ? 'flex max-h-[70vh]' : 'hidden'
+          }`}
+        >
           {infoPanel}
           {controlsPanel}
         </aside>
