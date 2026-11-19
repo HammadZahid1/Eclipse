@@ -6,6 +6,7 @@ interface ShortcutHandlers {
   onReset: () => void;
   onSpeedChange: (speed: SimulationSpeed) => void;
   onStep?: (direction: -1 | 1) => void;
+  onFullscreen?: () => void;
 }
 
 const isTypingTarget = (target: EventTarget | null) => {
@@ -16,12 +17,13 @@ const isTypingTarget = (target: EventTarget | null) => {
   );
 };
 
-/** Keyboard shortcuts for playback, stepping and simulation speed. */
+/** Keyboard shortcuts for playback, stepping, fullscreen and simulation speed. */
 export function useSimulationShortcuts({
   onToggleRunning,
   onReset,
   onSpeedChange,
   onStep,
+  onFullscreen,
 }: ShortcutHandlers) {
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -35,6 +37,9 @@ export function useSimulationShortcuts({
       } else if (event.key === '.' && onStep) {
         event.preventDefault();
         onStep(1);
+      } else if (event.key.toLowerCase() === 'f' && onFullscreen) {
+        event.preventDefault();
+        onFullscreen();
       } else if (event.key.toLowerCase() === 'r') {
         onReset();
       } else if (/^[1-6]$/.test(event.key)) {
@@ -43,5 +48,5 @@ export function useSimulationShortcuts({
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onReset, onSpeedChange, onStep, onToggleRunning]);
+  }, [onFullscreen, onReset, onSpeedChange, onStep, onToggleRunning]);
 }

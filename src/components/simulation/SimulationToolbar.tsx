@@ -1,4 +1,4 @@
-import { Camera, Eye, EyeOff, Maximize2, Pause, Play, RotateCcw, Tags } from 'lucide-react';
+import { Camera, Eye, EyeOff, Maximize2, Minimize2, Pause, Play, RotateCcw, Tags } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SIMULATION_SPEEDS, type SimulationSpeed } from '@/lib/constants';
 
@@ -8,6 +8,7 @@ interface SimulationToolbarProps {
   showOrbits: boolean;
   showLabels: boolean;
   fullscreenSupported?: boolean;
+  isFullscreen?: boolean;
   onToggleRunning: () => void;
   onReset: () => void;
   onResetCamera: () => void;
@@ -23,6 +24,7 @@ export function SimulationToolbar({
   showOrbits,
   showLabels,
   fullscreenSupported,
+  isFullscreen = false,
   onToggleRunning,
   onReset,
   onResetCamera,
@@ -76,7 +78,14 @@ export function SimulationToolbar({
         {speed}x
       </Button>
       {fullscreenSupported && onFullscreen && (
-        <Button size="sm" variant="ghost" icon={<Maximize2 size={14} />} aria-label="Toggle fullscreen" onClick={onFullscreen} />
+        <Button
+          size="sm"
+          variant="ghost"
+          icon={isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
+          aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+          aria-pressed={isFullscreen}
+          onClick={onFullscreen}
+        />
       )}
     </div>
   );

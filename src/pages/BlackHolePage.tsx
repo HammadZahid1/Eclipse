@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Panel } from '@/components/ui/Panel';
 import { DataRow } from '@/components/ui/DataRow';
@@ -20,6 +20,7 @@ import {
 } from '@/sim/blackhole/config';
 import { BLACK_HOLE_PRESETS, type SimulationPreset } from '@/sim/presets';
 import { useSimulationClock } from '@/hooks/useSimulationClock';
+import { useSimulationShortcuts } from '@/hooks/useSimulationShortcuts';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
 import type { SimulationSpeed } from '@/lib/constants';
@@ -35,7 +36,8 @@ export default function BlackHolePage() {
   const [settings, setSettings] = useState<BlackHoleSettings>(DEFAULT_BLACK_HOLE_SETTINGS);
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const { advance, reset, displayTime, timeRef } = useSimulationClock({ running, speed });
-  const fullscreen = useFullscreen();
+  const sceneRef = useRef<HTMLElement>(null);
+  const fullscreen = useFullscreen(sceneRef);
   const theme = getBlackHoleTheme(settings.themeId);
 
   const updateSettings = (patch: Partial<BlackHoleSettings>) => {
@@ -58,6 +60,13 @@ export default function BlackHolePage() {
     setRunning(true);
   };
 
+  useSimulationShortcuts({
+    onToggleRunning: () => setRunning((value) => !value),
+    onReset: handleReset,
+    onSpeedChange: setSpeed,
+    onFullscreen: fullscreen.toggle,
+  });
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       <div className="mx-auto w-full max-w-[1600px] px-5 pt-6 sm:px-8">
@@ -69,6 +78,7 @@ export default function BlackHolePage() {
       </div>
       <SimulationLayout
         className="min-h-0 flex-1"
+        sceneRef={sceneRef}
         scene={
           <BlackHoleScene
             clock={timeRef.current}
@@ -87,6 +97,7 @@ export default function BlackHolePage() {
             showOrbits={showOrbits}
             showLabels={showLabels}
             fullscreenSupported={fullscreen.supported}
+            isFullscreen={fullscreen.isFullscreen}
             onToggleRunning={() => setRunning((value) => !value)}
             onReset={handleReset}
             onResetCamera={() => setResetToken((token) => token + 1)}

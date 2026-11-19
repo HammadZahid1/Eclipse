@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Dices, RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Panel } from '@/components/ui/Panel';
@@ -12,6 +12,7 @@ import { SimulationLayout } from '@/components/simulation/SimulationLayout';
 import { SimulationToolbar } from '@/components/simulation/SimulationToolbar';
 import { GalaxyScene } from '@/components/scenes/galaxy/GalaxyScene';
 import { useFullscreen } from '@/hooks/useFullscreen';
+import { useSimulationShortcuts } from '@/hooks/useSimulationShortcuts';
 import { useSettingsStore } from '@/state/settingsStore';
 import { generateGalaxy } from '@/sim/galaxy/generator';
 import { GALAXY_PALETTES, getGalaxyPalette } from '@/sim/galaxy/palettes';
@@ -33,7 +34,8 @@ export default function GalaxyPage() {
   const [activePresetId, setActivePresetId] = useState<string | null>(null);
   const [resetToken, setResetToken] = useState(0);
   const [generation, setGeneration] = useState(0);
-  const fullscreen = useFullscreen();
+  const sceneRef = useRef<HTMLElement>(null);
+  const fullscreen = useFullscreen(sceneRef);
   const galaxy = useMemo(() => generateGalaxy(parameters), [parameters]);
   const palette = getGalaxyPalette(parameters.paletteId);
 
@@ -69,6 +71,13 @@ export default function GalaxyPage() {
     });
   };
 
+  useSimulationShortcuts({
+    onToggleRunning: () => setRunning((value) => !value),
+    onReset: handleReset,
+    onSpeedChange: setSpeed,
+    onFullscreen: fullscreen.toggle,
+  });
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
       <div className="mx-auto w-full max-w-[1600px] px-5 pt-6 sm:px-8">
@@ -80,6 +89,7 @@ export default function GalaxyPage() {
       </div>
       <SimulationLayout
         className="min-h-0 flex-1"
+        sceneRef={sceneRef}
         key={resetToken}
         scene={<GalaxyScene data={galaxy} rotating={running} speed={speed} />}
         status={{ running, time: parameters.starCount, speed, detail: `Seed ${parameters.seed}` }}
@@ -91,6 +101,7 @@ export default function GalaxyPage() {
             showOrbits={false}
             showLabels={false}
             fullscreenSupported={fullscreen.supported}
+            isFullscreen={fullscreen.isFullscreen}
             onToggleRunning={() => setRunning((value) => !value)}
             onReset={handleReset}
             onResetCamera={() => setResetToken((token) => token + 1)}

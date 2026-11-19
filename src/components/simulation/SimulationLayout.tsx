@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { SimulationStatusBar } from './SimulationStatusBar';
 import { PausedOverlay } from './PausedOverlay';
 
@@ -9,6 +9,8 @@ interface SimulationLayoutProps {
   controlsPanel: ReactNode;
   status: { running: boolean; time: number; speed: number; detail?: string };
   onResume?: () => void;
+  /** Node placed into fullscreen by the simulation toolbar. */
+  sceneRef?: RefObject<HTMLElement | null>;
   className?: string;
 }
 
@@ -20,12 +22,16 @@ export function SimulationLayout({
   controlsPanel,
   status,
   onResume,
+  sceneRef,
   className = '',
 }: SimulationLayoutProps) {
   return (
     <div className={`flex flex-col gap-3 px-3 pb-3 sm:px-4 sm:pb-4 ${className}`}>
       <div className="flex min-h-[420px] flex-1 flex-col gap-3 lg:flex-row">
-        <section className="relative min-h-[420px] flex-1 overflow-hidden rounded-xl border border-white/8 bg-void lg:min-h-0">
+        <section
+          ref={sceneRef}
+          className="ecl-fullscreen-target relative min-h-[420px] flex-1 overflow-hidden rounded-xl border border-white/8 bg-void lg:min-h-0"
+        >
           <div className="absolute inset-0">{scene}</div>
           <PausedOverlay visible={!status.running} onResume={onResume ?? (() => {})} />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,transparent_45%,rgba(3,4,10,0.55))]" />

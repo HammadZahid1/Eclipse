@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Panel } from '@/components/ui/Panel';
 import { DataRow } from '@/components/ui/DataRow';
@@ -25,7 +25,8 @@ export default function SolarSystemPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [focusId, setFocusId] = useState<string | null>(null);
   const { advance, reset, displayTime, timeRef } = useSimulationClock({ running, speed });
-  const fullscreen = useFullscreen();
+  const sceneRef = useRef<HTMLElement>(null);
+  const fullscreen = useFullscreen(sceneRef);
 
   const handleReset = () => {
     reset();
@@ -39,6 +40,7 @@ export default function SolarSystemPage() {
     onToggleRunning: () => setRunning((value) => !value),
     onReset: handleReset,
     onSpeedChange: setSpeed,
+    onFullscreen: fullscreen.toggle,
   });
 
   const selectedPlanet = PLANETS.find((planet) => planet.id === selectedId) ?? null;
@@ -54,6 +56,7 @@ export default function SolarSystemPage() {
       </div>
       <SimulationLayout
         className="min-h-0 flex-1"
+        sceneRef={sceneRef}
         scene={
           <SolarSystemScene
             clock={timeRef.current}
@@ -79,6 +82,7 @@ export default function SolarSystemPage() {
             showOrbits={showOrbits}
             showLabels={showLabels}
             fullscreenSupported={fullscreen.supported}
+            isFullscreen={fullscreen.isFullscreen}
             onToggleRunning={() => setRunning((value) => !value)}
             onReset={handleReset}
             onResetCamera={() => setResetToken((token) => token + 1)}

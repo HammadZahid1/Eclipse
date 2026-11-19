@@ -39,7 +39,8 @@ export default function OrbitLabPage() {
   const [speed, setSpeed] = useState<SimulationSpeed>(defaultSpeed);
   const [showTrails, setShowTrails] = useState(true);
   const [displayTime, setDisplayTime] = useState(0);
-  const fullscreen = useFullscreen();
+  const sceneRef = useRef<HTMLElement>(null);
+  const fullscreen = useFullscreen(sceneRef);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -127,6 +128,7 @@ export default function OrbitLabPage() {
     onReset: handleReset,
     onSpeedChange: setSpeed,
     onStep: step,
+    onFullscreen: fullscreen.toggle,
   });
 
   return (
@@ -140,6 +142,7 @@ export default function OrbitLabPage() {
       </div>
       <SimulationLayout
         className="min-h-0 flex-1"
+        sceneRef={sceneRef}
         scene={
           <OrbitLabScene
             engine={engine}
@@ -160,6 +163,7 @@ export default function OrbitLabPage() {
             showOrbits={showTrails}
             showLabels
             fullscreenSupported={fullscreen.supported}
+            isFullscreen={fullscreen.isFullscreen}
             onToggleRunning={() => setRunning((value) => !value)}
             onReset={handleReset}
             onResetCamera={() => setVersion((value) => value + 1)}

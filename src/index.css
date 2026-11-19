@@ -97,6 +97,19 @@ button {
   border-radius: 999px;
 }
 
+.ecl-fullscreen-target:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-void);
+}
+
+.ecl-fullscreen-target::backdrop {
+  background: var(--color-void);
+}
+
 .ecl-slider {
   appearance: none;
   -webkit-appearance: none;
