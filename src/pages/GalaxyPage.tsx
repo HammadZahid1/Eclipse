@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Dices } from 'lucide-react';
+import { Dices, RefreshCw } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Panel } from '@/components/ui/Panel';
 import { DataRow } from '@/components/ui/DataRow';
@@ -14,7 +14,7 @@ import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
 import { generateGalaxy } from '@/sim/galaxy/generator';
 import { GALAXY_PALETTES, getGalaxyPalette } from '@/sim/galaxy/palettes';
-import { createSeed, normalizeSeed } from '@/sim/galaxy/seed';
+import { createSeed, deriveSeed, normalizeSeed } from '@/sim/galaxy/seed';
 import {
   DEFAULT_GALAXY_PARAMETERS,
   GALAXY_LIMITS,
@@ -29,6 +29,7 @@ export default function GalaxyPage() {
   const [speed, setSpeed] = useState<SimulationSpeed>(defaultSpeed);
   const [parameters, setParameters] = useState<GalaxyParameters>(DEFAULT_GALAXY_PARAMETERS);
   const [resetToken, setResetToken] = useState(0);
+  const [generation, setGeneration] = useState(0);
   const fullscreen = useFullscreen();
   const galaxy = useMemo(() => generateGalaxy(parameters), [parameters]);
   const palette = getGalaxyPalette(parameters.paletteId);
@@ -39,9 +40,18 @@ export default function GalaxyPage() {
 
   const handleReset = () => {
     setParameters(DEFAULT_GALAXY_PARAMETERS);
+    setGeneration(0);
     setResetToken((token) => token + 1);
     setSpeed(defaultSpeed);
     setRunning(true);
+  };
+
+  const regenerate = () => {
+    setGeneration((current) => {
+      const next = current + 1;
+      setParameters((params) => ({ ...params, seed: deriveSeed(params.seed, next) }));
+      return next;
+    });
   };
 
   return (
@@ -81,6 +91,7 @@ export default function GalaxyPage() {
               <DataRow label="Type" value={parameters.type} />
               <DataRow label="Stars" value={galaxy.count.toLocaleString()} />
               <DataRow label="Seed" value={parameters.seed} mono />
+              <DataRow label="Generation" value={generation} />
               <DataRow label="Arms" value={parameters.arms} />
               <DataRow label="Radius" value={`${parameters.radius} u`} />
               <DataRow label="Palette" value={palette.name} mono={false} />
@@ -122,10 +133,22 @@ export default function GalaxyPage() {
                   type="button"
                   aria-label="Generate a new random seed"
                   title="Generate a new random seed"
-                  onClick={() => updateParameters({ seed: createSeed() })}
+                  onClick={() => {
+                    setGeneration(0);
+                    updateParameters({ seed: createSeed() });
+                  }}
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
                 >
                   <Dices size={15} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Regenerate galaxy from current seed"
+                  title="Regenerate"
+                  onClick={regenerate}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
+                >
+                  <RefreshCw size={15} />
                 </button>
               </div>
               <p className="text-[11px] leading-relaxed text-muted/80">

@@ -22,3 +22,9 @@ export function normalizeSeed(value: string): string {
 export function seedToNumber(value: string): number {
   return hashSeed(normalizeSeed(value));
 }
+
+/** Derives the next seed from a base seed and a generation counter. */
+export function deriveSeed(baseSeed: string, generation: number): string {
+  const hash = hashSeed(`${normalizeSeed(baseSeed)}:${generation}`).toString(36).toUpperCase();
+  return `${normalizeSeed(baseSeed).slice(0, 12)}-G${generation}-${hash.slice(0, 5)}`.slice(0, 40);
+}

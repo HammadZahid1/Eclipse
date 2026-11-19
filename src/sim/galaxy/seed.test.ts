@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createRandom, hashSeed } from '@/lib/random';
-import { createSeed, normalizeSeed, seedToNumber } from './seed';
+import { createSeed, deriveSeed, normalizeSeed, seedToNumber } from './seed';
 import { generateGalaxy } from './generator';
 import { DEFAULT_GALAXY_PARAMETERS } from './types';
 
@@ -19,6 +19,11 @@ describe('deterministic seed system', () => {
   it('normalizes empty and oversized seeds', () => {
     expect(normalizeSeed('   ')).toBe('eclipse');
     expect(normalizeSeed('x'.repeat(100))).toHaveLength(40);
+  });
+
+  it('derives reproducible generation seeds', () => {
+    expect(deriveSeed('base', 2)).toBe(deriveSeed('base', 2));
+    expect(deriveSeed('base', 2)).not.toBe(deriveSeed('base', 3));
   });
 
   it('creates readable seeds with a stable format', () => {
