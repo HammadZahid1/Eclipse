@@ -4,16 +4,21 @@ import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { PLANETS } from '@/sim/solar/data';
 import { planetPosition } from '@/sim/solar/orbital';
+import type { SimulationClock } from '@/sim/time';
 import { StarField } from '@/components/particles/StarField';
 import { RenderCanvas } from '@/components/three/RenderCanvas';
 import { Star } from './Star';
+import { Planet } from './Planet';
 
 interface SolarSystemSceneProps {
+  clock: SimulationClock;
   advance: (delta: number, onStep: (step: number, time: number) => void) => void;
   resetToken: number;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
 }
 
-function SceneContents({ advance, resetToken }: SolarSystemSceneProps) {
+function SceneContents({ clock, advance, resetToken, selectedId, onSelect }: SolarSystemSceneProps) {
   const planetGroups = useRef<Record<string, THREE.Group | null>>({});
 
   useFrame((_, delta) => {
@@ -33,17 +38,16 @@ function SceneContents({ advance, resetToken }: SolarSystemSceneProps) {
       <ambientLight intensity={0.22} />
       <Star />
       {PLANETS.map((planet) => (
-        <group
+        <Planet
           key={`${planet.id}-${resetToken}`}
-          ref={(node) => {
+          planet={planet}
+          clock={clock}
+          selected={selectedId === planet.id}
+          onSelect={onSelect}
+          groupRef={(node) => {
             planetGroups.current[planet.id] = node;
           }}
-        >
-          <mesh>
-            <sphereGeometry args={[planet.radius, 32, 32]} />
-            <meshStandardMaterial color={planet.color} roughness={0.85} metalness={0.08} />
-          </mesh>
-        </group>
+        />
       ))}
       <OrbitControls
         makeDefault

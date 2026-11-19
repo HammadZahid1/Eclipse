@@ -18,7 +18,8 @@ export default function SolarSystemPage() {
   const [showOrbits, setShowOrbits] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const [resetToken, setResetToken] = useState(0);
-  const { advance, reset, displayTime } = useSimulationClock({ running, speed });
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { advance, reset, displayTime, timeRef } = useSimulationClock({ running, speed });
   const fullscreen = useFullscreen();
 
   const handleReset = () => {
@@ -37,7 +38,15 @@ export default function SolarSystemPage() {
       </div>
       <SimulationLayout
         className="min-h-0 flex-1"
-        scene={<SolarSystemScene advance={advance} resetToken={resetToken} />}
+        scene={
+          <SolarSystemScene
+            clock={timeRef.current}
+            advance={advance}
+            resetToken={resetToken}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+        }
         status={{ running, time: displayTime, speed, detail: `${PLANETS.length} simulated bodies` }}
         toolbar={
           <SimulationToolbar
