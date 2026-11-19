@@ -4,6 +4,7 @@ import { Panel } from '@/components/ui/Panel';
 import { DataRow } from '@/components/ui/DataRow';
 import { RangeControl } from '@/components/ui/RangeControl';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { ThemeSelector } from '@/components/simulation/ThemeSelector';
 import type { GalaxyType } from '@/types/simulation';
 import { SimulationLayout } from '@/components/simulation/SimulationLayout';
 import { SimulationToolbar } from '@/components/simulation/SimulationToolbar';
@@ -11,7 +12,7 @@ import { GalaxyScene } from '@/components/scenes/galaxy/GalaxyScene';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
 import { generateGalaxy } from '@/sim/galaxy/generator';
-import { getGalaxyPalette } from '@/sim/galaxy/palettes';
+import { GALAXY_PALETTES, getGalaxyPalette } from '@/sim/galaxy/palettes';
 import {
   DEFAULT_GALAXY_PARAMETERS,
   GALAXY_LIMITS,
@@ -102,15 +103,80 @@ export default function GalaxyPage() {
               columns={2}
             />
             <div className="my-5" />
-            <RangeControl
-              label="Star count"
-              value={parameters.starCount}
-              min={GALAXY_LIMITS.starCount.min}
-              max={GALAXY_LIMITS.starCount.max}
-              step={GALAXY_LIMITS.starCount.step}
-              format={(value) => value.toLocaleString()}
-              onChange={(starCount) => updateParameters({ starCount })}
-            />
+            <div className="space-y-5">
+              <RangeControl
+                label="Star count"
+                value={parameters.starCount}
+                min={GALAXY_LIMITS.starCount.min}
+                max={GALAXY_LIMITS.starCount.max}
+                step={GALAXY_LIMITS.starCount.step}
+                format={(value) => value.toLocaleString()}
+                onChange={(starCount) => updateParameters({ starCount })}
+              />
+              <RangeControl
+                label="Arms"
+                value={parameters.arms}
+                min={GALAXY_LIMITS.arms.min}
+                max={GALAXY_LIMITS.arms.max}
+                step={GALAXY_LIMITS.arms.step}
+                onChange={(arms) => updateParameters({ arms })}
+              />
+              <RangeControl
+                label="Galaxy radius"
+                value={parameters.radius}
+                min={GALAXY_LIMITS.radius.min}
+                max={GALAXY_LIMITS.radius.max}
+                step={GALAXY_LIMITS.radius.step}
+                format={(value) => `${value} u`}
+                onChange={(radius) => updateParameters({ radius })}
+              />
+              <RangeControl
+                label="Spread"
+                value={parameters.spread}
+                min={GALAXY_LIMITS.spread.min}
+                max={GALAXY_LIMITS.spread.max}
+                step={GALAXY_LIMITS.spread.step}
+                format={(value) => value.toFixed(2)}
+                onChange={(spread) => updateParameters({ spread })}
+              />
+              <RangeControl
+                label="Rotation"
+                value={parameters.rotation}
+                min={GALAXY_LIMITS.rotation.min}
+                max={GALAXY_LIMITS.rotation.max}
+                step={GALAXY_LIMITS.rotation.step}
+                format={(value) => value.toFixed(2)}
+                onChange={(rotation) => updateParameters({ rotation })}
+              />
+              <RangeControl
+                label="Randomness"
+                value={parameters.randomness}
+                min={GALAXY_LIMITS.randomness.min}
+                max={GALAXY_LIMITS.randomness.max}
+                step={GALAXY_LIMITS.randomness.step}
+                format={(value) => value.toFixed(2)}
+                onChange={(randomness) => updateParameters({ randomness })}
+              />
+              <RangeControl
+                label="Particle size"
+                value={parameters.particleSize}
+                min={GALAXY_LIMITS.particleSize.min}
+                max={GALAXY_LIMITS.particleSize.max}
+                step={GALAXY_LIMITS.particleSize.step}
+                format={(value) => value.toFixed(1)}
+                onChange={(particleSize) => updateParameters({ particleSize })}
+              />
+              <ThemeSelector
+                label="Color palette"
+                themes={GALAXY_PALETTES.map((item) => ({
+                  id: item.id,
+                  name: item.name,
+                  colors: item.colors,
+                }))}
+                value={parameters.paletteId}
+                onChange={(paletteId) => updateParameters({ paletteId })}
+              />
+            </div>
           </Panel>
         }
       />
