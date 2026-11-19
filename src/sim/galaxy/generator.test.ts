@@ -31,6 +31,20 @@ describe('galaxy generator', () => {
     expect(maxY).toBeLessThan(maxX);
   });
 
+  it('concentrates ring galaxies in an outer annulus', () => {
+    const params = { ...DEFAULT_GALAXY_PARAMETERS, type: 'ring' as const, starCount: 4000, randomness: 0 };
+    const ring = generateGalaxy(params);
+    const spiral = generateGalaxy({ ...params, type: 'spiral' });
+    expect(Array.from(ring.positions)).not.toEqual(Array.from(spiral.positions));
+
+    let outerCount = 0;
+    for (let i = 0; i < ring.count; i += 1) {
+      const radius = Math.hypot(ring.positions[i * 3], ring.positions[i * 3 + 2]);
+      if (radius > params.radius * 0.6) outerCount += 1;
+    }
+    expect(outerCount / ring.count).toBeGreaterThan(0.7);
+  });
+
   it('respects the requested star count and clamps excessive values', () => {
     expect(generateGalaxy(DEFAULT_GALAXY_PARAMETERS).count).toBe(DEFAULT_GALAXY_PARAMETERS.starCount);
     const clamped = clampGalaxyParameters({ ...DEFAULT_GALAXY_PARAMETERS, starCount: 999999 });

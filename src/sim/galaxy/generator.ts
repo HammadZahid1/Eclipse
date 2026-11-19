@@ -57,6 +57,27 @@ function generateElliptical(params: GalaxyParameters, random: Random, write: Sta
   }
 }
 
+function generateRing(params: GalaxyParameters, random: Random, write: StarWriter): void {
+  for (let i = 0; i < params.starCount; i += 1) {
+    const isSpoke = random() < 0.12 + params.randomness * 0.1;
+    const spokeAngle = (i % params.arms) * ((Math.PI * 2) / params.arms);
+    const radius = isSpoke
+      ? params.radius * (0.2 + random() * 0.72)
+      : params.radius * (0.68 + random() * 0.32);
+    const angle = (isSpoke ? spokeAngle : random() * Math.PI * 2) +
+      (random() - 0.5) * params.spread * 0.4;
+    write(
+      i,
+      Math.cos(angle) * radius,
+      gaussian(random) * params.radius * 0.02 * (0.5 + params.spread),
+      Math.sin(angle) * radius,
+      isSpoke ? 3 : Math.min(3, Math.floor(random() * 3)),
+      0.6 + random() * 0.4,
+      0.5 + random() * 0.9,
+    );
+  }
+}
+
 /** Generates a galaxy entirely in memory from deterministic parameters. */
 export function generateGalaxy(input: GalaxyParameters): GalaxyData {
   const params = clampGalaxyParameters(input);
@@ -87,6 +108,7 @@ export function generateGalaxy(input: GalaxyParameters): GalaxyData {
   };
 
   if (params.type === 'elliptical') generateElliptical(params, random, write);
+  else if (params.type === 'ring') generateRing(params, random, write);
   else generateSpiral(params, random, write);
 
   return { positions, colors, sizes, count };
