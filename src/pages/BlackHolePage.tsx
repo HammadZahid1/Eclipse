@@ -6,6 +6,8 @@ import { SimulationLayout } from '@/components/simulation/SimulationLayout';
 import { SimulationToolbar } from '@/components/simulation/SimulationToolbar';
 import { SpeedControls } from '@/components/simulation/SpeedControls';
 import { BlackHoleScene } from '@/components/scenes/blackhole/BlackHoleScene';
+import type { BlackHoleView } from '@/components/scenes/blackhole/CameraRig';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { useSimulationClock } from '@/hooks/useSimulationClock';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
@@ -23,6 +25,7 @@ export default function BlackHolePage() {
   const [showOrbits, setShowOrbits] = useState(false);
   const [showLabels, setShowLabels] = useState(false);
   const [resetToken, setResetToken] = useState(0);
+  const [view, setView] = useState<BlackHoleView>('overview');
   const [settings, setSettings] = useState<BlackHoleSettings>(DEFAULT_BLACK_HOLE_SETTINGS);
   const { advance, reset, displayTime, timeRef } = useSimulationClock({ running, speed });
   const fullscreen = useFullscreen();
@@ -52,6 +55,7 @@ export default function BlackHolePage() {
             advance={advance}
             settings={settings}
             resetToken={resetToken}
+            view={view}
           />
         }
         status={{ running, time: displayTime, speed, detail: 'Visual model — not general relativity' }}
@@ -87,8 +91,19 @@ export default function BlackHolePage() {
           </Panel>
         }
         controlsPanel={
-          <Panel title="Playback" eyebrow="Controls">
+          <Panel title="Playback & camera" eyebrow="Controls">
             <SpeedControls speed={speed} onChange={setSpeed} />
+            <div className="my-5 border-t border-white/8" />
+            <SegmentedControl
+              label="Camera preset"
+              value={view}
+              onChange={setView}
+              options={[
+                { value: 'overview', label: 'Overview' },
+                { value: 'edge', label: 'Edge-on' },
+                { value: 'top', label: 'Top-down' },
+              ]}
+            />
           </Panel>
         }
       />

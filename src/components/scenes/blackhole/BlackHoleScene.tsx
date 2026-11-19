@@ -7,12 +7,14 @@ import { getBlackHoleTheme, type BlackHoleSettings } from '@/sim/blackhole/confi
 import type { SimulationClock } from '@/sim/time';
 import { AccretionDisk } from './AccretionDisk';
 import { PolarJets } from './PolarJets';
+import { CameraRig, type BlackHoleView } from './CameraRig';
 
 interface BlackHoleSceneProps {
   clock: SimulationClock;
   advance: (delta: number, onStep: (step: number, time: number) => void) => void;
   settings: BlackHoleSettings;
   resetToken: number;
+  view: BlackHoleView;
 }
 
 function EventHorizon({ glow }: { glow: string }) {
@@ -41,12 +43,13 @@ function EventHorizon({ glow }: { glow: string }) {
   );
 }
 
-function SceneContents({ advance, settings, clock, resetToken }: BlackHoleSceneProps) {
+function SceneContents({ advance, settings, clock, resetToken, view }: BlackHoleSceneProps) {
   const theme = getBlackHoleTheme(settings.themeId);
   useFrame((_, delta) => advance(delta, () => {}));
 
   return (
     <>
+      <CameraRig view={view} resetToken={resetToken} />
       <StarField count={700} seed="black-hole" radius={100} rotationSpeed={0.0015} />
       <ambientLight intensity={0.08} />
       <EventHorizon glow={theme.glow} />
