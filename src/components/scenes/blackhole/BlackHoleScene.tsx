@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -6,6 +5,7 @@ import { RenderCanvas } from '@/components/three/RenderCanvas';
 import { StarField } from '@/components/particles/StarField';
 import { getBlackHoleTheme, type BlackHoleSettings } from '@/sim/blackhole/config';
 import type { SimulationClock } from '@/sim/time';
+import { AccretionDisk } from './AccretionDisk';
 
 interface BlackHoleSceneProps {
   clock: SimulationClock;
@@ -40,27 +40,7 @@ function EventHorizon({ glow }: { glow: string }) {
   );
 }
 
-function DiskPlaceholder({ color, rotationSpeed }: { color: string; rotationSpeed: number }) {
-  const disk = useRef<THREE.Mesh>(null);
-  useFrame((_, delta) => {
-    if (disk.current) disk.current.rotation.z += delta * rotationSpeed;
-  });
-  return (
-    <mesh ref={disk} rotation={[-Math.PI / 2 + 0.16, 0, 0]}>
-      <ringGeometry args={[1.6, 4.4, 128]} />
-      <meshBasicMaterial
-        color={color}
-        transparent
-        opacity={0.16}
-        side={THREE.DoubleSide}
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </mesh>
-  );
-}
-
-function SceneContents({ advance, settings }: BlackHoleSceneProps) {
+function SceneContents({ advance, settings, clock, resetToken }: BlackHoleSceneProps) {
   const theme = getBlackHoleTheme(settings.themeId);
   useFrame((_, delta) => advance(delta, () => {}));
 
@@ -69,7 +49,7 @@ function SceneContents({ advance, settings }: BlackHoleSceneProps) {
       <StarField count={700} seed="black-hole" radius={100} rotationSpeed={0.0015} />
       <ambientLight intensity={0.08} />
       <EventHorizon glow={theme.glow} />
-      <DiskPlaceholder color={theme.middle} rotationSpeed={settings.rotationSpeed} />
+      <AccretionDisk clock={clock} settings={settings} seed={`disk-${resetToken}`} />
       <OrbitControls
         makeDefault
         enableDamping
