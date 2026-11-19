@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { createRandom } from '@/lib/random';
 import { planetRotation } from '@/sim/solar/orbital';
@@ -44,9 +45,17 @@ interface PlanetProps {
   groupRef: (node: THREE.Group | null) => void;
   selected?: boolean;
   onSelect?: (id: string) => void;
+  showLabel?: boolean;
 }
 
-export function Planet({ planet, clock, groupRef, selected = false, onSelect }: PlanetProps) {
+export function Planet({
+  planet,
+  clock,
+  groupRef,
+  selected = false,
+  onSelect,
+  showLabel = true,
+}: PlanetProps) {
   const surface = useRef<THREE.Mesh>(null);
   const texture = usePlanetTexture(planet);
 
@@ -106,6 +115,25 @@ export function Planet({ planet, clock, groupRef, selected = false, onSelect }: 
           </mesh>
         )}
       </group>
+
+      {showLabel && (
+        <Html
+          position={[0, planet.radius + 0.42, 0]}
+          center
+          distanceFactor={13}
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        >
+          <div
+            className={`whitespace-nowrap rounded border px-2 py-1 text-[10px] tracking-wider backdrop-blur-sm ${
+              selected
+                ? 'border-cyan/50 bg-void/80 text-cyan'
+                : 'border-white/10 bg-void/60 text-muted'
+            }`}
+          >
+            {planet.name.toUpperCase()}
+          </div>
+        </Html>
+      )}
 
       {selected && (
         <mesh>

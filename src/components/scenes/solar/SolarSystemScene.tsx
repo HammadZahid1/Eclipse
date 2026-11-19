@@ -18,6 +18,8 @@ interface SolarSystemSceneProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   showOrbits: boolean;
+  showLabels: boolean;
+  focusId: string | null;
   onClearSelection: () => void;
 }
 
@@ -28,6 +30,7 @@ function SceneContents({
   selectedId,
   onSelect,
   showOrbits,
+  showLabels,
 }: SolarSystemSceneProps) {
   const planetGroups = useRef<Record<string, THREE.Group | null>>({});
   const states = useRef<Record<string, OrbitalBodyState>>({});
@@ -65,6 +68,7 @@ function SceneContents({
           clock={clock}
           selected={selectedId === planet.id}
           onSelect={onSelect}
+          showLabel={showLabels}
           groupRef={(node) => {
             planetGroups.current[planet.id] = node;
           }}

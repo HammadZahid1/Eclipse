@@ -9,6 +9,7 @@ import { useSimulationClock } from '@/hooks/useSimulationClock';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
 import { PlanetSelector } from '@/components/simulation/PlanetSelector';
+import { PlanetInfoPanel } from '@/components/simulation/PlanetInfoPanel';
 import { PLANETS, SOLAR_SYSTEM_BOUNDS } from '@/sim/solar/data';
 import type { SimulationSpeed } from '@/lib/constants';
 
@@ -20,6 +21,7 @@ export default function SolarSystemPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [resetToken, setResetToken] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [focusId, setFocusId] = useState<string | null>(null);
   const { advance, reset, displayTime, timeRef } = useSimulationClock({ running, speed });
   const fullscreen = useFullscreen();
 
@@ -27,6 +29,8 @@ export default function SolarSystemPage() {
     reset();
     setResetToken((token) => token + 1);
   };
+
+  const selectedPlanet = PLANETS.find((planet) => planet.id === selectedId) ?? null;
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] flex-col">
@@ -47,7 +51,12 @@ export default function SolarSystemPage() {
             selectedId={selectedId}
             onSelect={setSelectedId}
             showOrbits={showOrbits}
-            onClearSelection={() => setSelectedId(null)}
+            showLabels={showLabels}
+            focusId={focusId}
+            onClearSelection={() => {
+              setSelectedId(null);
+              setFocusId(null);
+            }}
           />
         }
         status={{ running, time: displayTime, speed, detail: `${PLANETS.length} simulated bodies` }}
@@ -68,16 +77,29 @@ export default function SolarSystemPage() {
           />
         }
         infoPanel={
-          <Panel title="System overview" eyebrow="Live simulation">
-            <dl>
-              <DataRow label="Bodies" value={PLANETS.length + 1} />
-              <DataRow label="Planets" value={PLANETS.length} />
-              <DataRow label="Orbit range" value={`${SOLAR_SYSTEM_BOUNDS.min} – ${SOLAR_SYSTEM_BOUNDS.max} u`} />
-            </dl>
-            <p className="mt-4 text-[11px] leading-relaxed text-muted/70">
-              Distances and rates are abstract simulation units chosen for legibility.
-            </p>
-          </Panel>
+          selectedPlanet ? (
+            <PlanetInfoPanel
+              planet={selectedPlanet}
+              time={displayTime}
+              focused={focusId === selectedPlanet.id}
+              onFocus={() => setFocusId(selectedPlanet.id)}
+              onClear={() => {
+                setSelectedId(null);
+                setFocusId(null);
+              }}
+            />
+          ) : (
+            <Panel title="System overview" eyebrow="Live simulation">
+              <dl>
+                <DataRow label="Bodies" value={PLANETS.length + 1} />
+                <DataRow label="Planets" value={PLANETS.length} />
+                <DataRow label="Orbit range" value={`${SOLAR_SYSTEM_BOUNDS.min} – ${SOLAR_SYSTEM_BOUNDS.max} u`} />
+              </dl>
+              <p className="mt-4 text-[11px] leading-relaxed text-muted/70">
+                Select a planet in the scene or the list below to inspect its simulated parameters.
+              </p>
+            </Panel>
+          )
         }
         controlsPanel={
           <Panel title="Body selection" eyebrow="Controls">
