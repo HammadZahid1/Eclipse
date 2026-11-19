@@ -10,6 +10,7 @@ import { RenderCanvas } from '@/components/three/RenderCanvas';
 import { Star } from './Star';
 import { Planet } from './Planet';
 import { OrbitPath } from './OrbitPath';
+import { CameraRig } from './CameraRig';
 
 interface SolarSystemSceneProps {
   clock: SimulationClock;
@@ -31,6 +32,7 @@ function SceneContents({
   onSelect,
   showOrbits,
   showLabels,
+  focusId,
 }: SolarSystemSceneProps) {
   const planetGroups = useRef<Record<string, THREE.Group | null>>({});
   const states = useRef<Record<string, OrbitalBodyState>>({});
@@ -50,6 +52,7 @@ function SceneContents({
 
   return (
     <>
+      <CameraRig focusId={focusId} resetToken={resetToken} states={states} />
       <StarField count={900} seed="solar-system" radius={110} rotationSpeed={0.002} />
       <ambientLight intensity={0.22} />
       <Star />
