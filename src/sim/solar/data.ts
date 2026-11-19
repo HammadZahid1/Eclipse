@@ -22,6 +22,7 @@ export interface PlanetConfig {
   color: string;
   initialAngle: number;
   inclination?: number;
+  axialTilt?: number;
   ring?: RingConfig;
   atmosphere?: AtmosphereConfig;
   description: string;
@@ -57,6 +58,7 @@ export const PLANETS: readonly PlanetConfig[] = [
     rotationSpeed: 0.18,
     color: '#b8a191',
     initialAngle: 0.4,
+    axialTilt: 0.05,
     description: 'A small, fast inner world with a barren surface.',
   },
   {
@@ -68,6 +70,7 @@ export const PLANETS: readonly PlanetConfig[] = [
     rotationSpeed: 0.24,
     color: '#d8b58a',
     initialAngle: 2.1,
+    axialTilt: 0.12,
     atmosphere: { color: '#ffcf9b', intensity: 0.12 },
     description: 'A warm world wrapped in a thin simulated haze.',
   },
@@ -80,6 +83,7 @@ export const PLANETS: readonly PlanetConfig[] = [
     rotationSpeed: 0.62,
     color: '#4b8fd6',
     initialAngle: 4.0,
+    axialTilt: 0.41,
     atmosphere: { color: '#51e4f2', intensity: 0.2 },
     description: 'A temperate blue world used as the system reference point.',
   },
@@ -92,6 +96,7 @@ export const PLANETS: readonly PlanetConfig[] = [
     rotationSpeed: 0.5,
     color: '#b85d4a',
     initialAngle: 1.2,
+    axialTilt: 0.44,
     description: 'A dusty red planet with a slow, steady orbit.',
   },
   {
@@ -103,6 +108,7 @@ export const PLANETS: readonly PlanetConfig[] = [
     rotationSpeed: 1.1,
     color: '#d1a878',
     initialAngle: 5.4,
+    axialTilt: 0.09,
     atmosphere: { color: '#f4c997', intensity: 0.1 },
     description: 'A large gas giant dominating the outer system.',
   },
@@ -116,6 +122,7 @@ export const PLANETS: readonly PlanetConfig[] = [
     color: '#c9b48f',
     initialAngle: 3.0,
     inclination: 0.12,
+    axialTilt: 0.55,
     ring: { innerRadius: 0.65, outerRadius: 1.1, color: '#cbd5e8', opacity: 0.35, tilt: 0.35 },
     description: 'A ringed giant with a gently inclined orbit.',
   },
@@ -128,6 +135,7 @@ export const PLANETS: readonly PlanetConfig[] = [
     rotationSpeed: -0.35,
     color: '#8fd4e8',
     initialAngle: 0.9,
+    axialTilt: 1.7,
     atmosphere: { color: '#9b82ff', intensity: 0.14 },
     description: 'An ice giant with a retrograde simulated rotation.',
   },

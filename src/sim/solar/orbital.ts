@@ -1,3 +1,4 @@
+import { wrapAngle } from '@/lib/math';
 import type { PlanetConfig } from './data';
 
 export type Position3 = [number, number, number];
@@ -20,5 +21,6 @@ export function planetPosition(planet: PlanetConfig, time: number): Position3 {
 
 /** Instantaneous rotation angle of a planet's surface. */
 export function planetRotation(planet: PlanetConfig, time: number): number {
-  return planet.rotationSpeed * time;
+  // Wrapping keeps float precision stable during long-running simulations.
+  return wrapAngle(planet.rotationSpeed * time);
 }

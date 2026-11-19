@@ -57,6 +57,7 @@ export function Planet({ planet, clock, groupRef, selected = false, onSelect }: 
   return (
     <group ref={groupRef}>
       <group
+        rotation={[0, 0, planet.axialTilt ?? 0]}
         onClick={(event) => {
           event.stopPropagation();
           onSelect?.(planet.id);

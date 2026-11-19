@@ -22,6 +22,15 @@ describe('solar orbital engine', () => {
     expect(planetRotation(terra, 4)).toBeCloseTo(terra.rotationSpeed * 4);
   });
 
+  it('bounds rotation angles during long simulations', () => {
+    const rotation = planetRotation(terra, 100000);
+    expect(Math.abs(rotation)).toBeLessThanOrEqual(Math.PI);
+  });
+
+  it('defines axial tilt for every planet', () => {
+    expect(PLANETS.every((planet) => typeof planet.axialTilt === 'number')).toBe(true);
+  });
+
   it('samples deterministic body states', () => {
     const engine = new SolarOrbitEngine(PLANETS);
     const first: Record<string, OrbitalBodyState> = {};
