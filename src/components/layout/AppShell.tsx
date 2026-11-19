@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { ROUTES } from '@/app/routes';
-import { PRODUCT_NAME } from '@/lib/constants';
+import { Navigation } from './Navigation';
 
 interface AppShellProps {
   children: ReactNode;
@@ -19,15 +17,7 @@ export function AppShell({ children }: AppShellProps) {
       <div className="pointer-events-none fixed inset-0 ecl-grid-overlay opacity-70" />
       <div className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_at_50%_-10%,rgba(82,153,255,0.10),transparent_55%)]" />
       <div className="relative z-10 flex min-h-screen flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-white/8 px-5 sm:px-8">
-          <Link to={ROUTES.home} className="group flex items-center gap-3" aria-label="ECLIPSE home">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-electric/50 shadow-[0_0_18px_-4px_rgba(82,153,255,0.8)]">
-              <span className="h-2 w-2 rounded-full bg-cyan" />
-            </span>
-            <span className="text-xs font-medium tracking-[0.35em] text-ink">{PRODUCT_NAME}</span>
-          </Link>
-          <p className="ecl-label hidden sm:block">Interactive space laboratory</p>
-        </header>
+        <Navigation />
         <main id="main-content" className="flex-1">
           {children}
         </main>
