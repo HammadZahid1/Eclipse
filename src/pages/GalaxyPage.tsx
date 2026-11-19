@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Dices } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Panel } from '@/components/ui/Panel';
 import { DataRow } from '@/components/ui/DataRow';
@@ -13,6 +14,7 @@ import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
 import { generateGalaxy } from '@/sim/galaxy/generator';
 import { GALAXY_PALETTES, getGalaxyPalette } from '@/sim/galaxy/palettes';
+import { createSeed, normalizeSeed } from '@/sim/galaxy/seed';
 import {
   DEFAULT_GALAXY_PARAMETERS,
   GALAXY_LIMITS,
@@ -103,6 +105,34 @@ export default function GalaxyPage() {
               columns={2}
             />
             <div className="my-5" />
+            <div className="space-y-2">
+              <label htmlFor="galaxy-seed" className="ecl-label">
+                Seed
+              </label>
+              <div className="flex gap-2">
+                <input
+                  id="galaxy-seed"
+                  type="text"
+                  value={parameters.seed}
+                  maxLength={40}
+                  onChange={(event) => updateParameters({ seed: normalizeSeed(event.target.value) })}
+                  className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/30 px-3 py-2 ecl-value text-xs text-ink outline-none focus:border-cyan/50"
+                />
+                <button
+                  type="button"
+                  aria-label="Generate a new random seed"
+                  title="Generate a new random seed"
+                  onClick={() => updateParameters({ seed: createSeed() })}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/10 text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
+                >
+                  <Dices size={15} />
+                </button>
+              </div>
+              <p className="text-[11px] leading-relaxed text-muted/80">
+                Identical seeds and parameters always reproduce the same structure.
+              </p>
+            </div>
+            <div className="my-5 border-t border-white/8" />
             <div className="space-y-5">
               <RangeControl
                 label="Star count"
