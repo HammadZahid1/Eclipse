@@ -1,47 +1,9 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { createRandom } from '@/lib/random';
 import { useSettingsStore } from '@/state/settingsStore';
+import { StarField } from '@/components/particles/StarField';
 import { RenderCanvas } from './RenderCanvas';
-
-function BackgroundStars({ count = 900 }: { count?: number }) {
-  const group = useRef<THREE.Group>(null);
-  const geometry = useMemo(() => {
-    const random = createRandom('eclipse-hero-stars');
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-    const palette = [new THREE.Color('#ffffff'), new THREE.Color('#5299ff'), new THREE.Color('#9b82ff')];
-    for (let i = 0; i < count; i += 1) {
-      const radius = 20 + random() * 70;
-      const theta = random() * Math.PI * 2;
-      const phi = Math.acos(2 * random() - 1);
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.cos(phi);
-      positions[i * 3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
-      const color = palette[Math.floor(random() * palette.length)];
-      colors[i * 3] = color.r;
-      colors[i * 3 + 1] = color.g;
-      colors[i * 3 + 2] = color.b;
-    }
-    const result = new THREE.BufferGeometry();
-    result.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    result.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    return result;
-  }, [count]);
-
-  useFrame((_, delta) => {
-    if (group.current) group.current.rotation.y += delta * 0.004;
-  });
-
-  return (
-    <group ref={group}>
-      <points geometry={geometry}>
-        <pointsMaterial size={0.32} vertexColors transparent opacity={0.8} sizeAttenuation depthWrite={false} />
-      </points>
-    </group>
-  );
-}
 
 function HeroPlanet() {
   const planet = useRef<THREE.Mesh>(null);
@@ -151,7 +113,7 @@ function Scene() {
       <ambientLight intensity={0.32} />
       <directionalLight position={[4, 5, 5]} intensity={2.1} color="#c9dcff" />
       <pointLight position={[-5, -3, 2]} intensity={18} color="#9b82ff" distance={25} />
-      <BackgroundStars />
+      <StarField count={1100} seed="eclipse-hero-stars" />
       <OrbitPath />
       <HeroPlanet />
       <GlowBody />
