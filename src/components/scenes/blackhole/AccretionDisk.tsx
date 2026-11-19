@@ -24,12 +24,16 @@ const vertexShader = /* glsl */ `
 
   void main() {
     float angle = aPhase + uTime * aSpeed * uRotation;
-    vec3 animated = vec3(cos(angle) * aRadius, aHeight, sin(angle) * aRadius);
+    float wobble = sin(uTime * 0.8 + aPhase * 3.0) * 0.035;
+    vec3 animated = vec3(cos(angle) * aRadius, aHeight + wobble, sin(angle) * aRadius);
     vec4 mvPosition = modelViewMatrix * vec4(animated, 1.0);
     gl_PointSize = aSize * uIntensity * (150.0 / max(-mvPosition.z, 0.1));
     gl_Position = projectionMatrix * mvPosition;
-    vColor = aColor;
-    vAlpha = mix(1.0, 0.35, aMix) * uIntensity;
+
+    // Visual-only brightness asymmetry inspired by a rotating disk.
+    float doppler = 0.7 + 0.3 * cos(angle - 0.7);
+    vColor = aColor * (0.85 + doppler * 0.5);
+    vAlpha = mix(1.0, 0.35, aMix) * uIntensity * doppler;
   }
 `;
 

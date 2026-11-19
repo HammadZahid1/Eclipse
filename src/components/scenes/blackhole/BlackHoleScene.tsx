@@ -6,6 +6,7 @@ import { StarField } from '@/components/particles/StarField';
 import { getBlackHoleTheme, type BlackHoleSettings } from '@/sim/blackhole/config';
 import type { SimulationClock } from '@/sim/time';
 import { AccretionDisk } from './AccretionDisk';
+import { PolarJets } from './PolarJets';
 
 interface BlackHoleSceneProps {
   clock: SimulationClock;
@@ -50,6 +51,7 @@ function SceneContents({ advance, settings, clock, resetToken }: BlackHoleSceneP
       <ambientLight intensity={0.08} />
       <EventHorizon glow={theme.glow} />
       <AccretionDisk clock={clock} settings={settings} seed={`disk-${resetToken}`} />
+      <PolarJets clock={clock} settings={settings} />
       <OrbitControls
         makeDefault
         enableDamping
