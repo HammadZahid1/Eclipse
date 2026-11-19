@@ -45,6 +45,15 @@ describe('galaxy generator', () => {
     expect(outerCount / ring.count).toBeGreaterThan(0.7);
   });
 
+  it('creates a clumpy but bounded irregular galaxy', () => {
+    const params = { ...DEFAULT_GALAXY_PARAMETERS, type: 'irregular' as const, starCount: 5000 };
+    const irregular = generateGalaxy(params);
+    const spiral = generateGalaxy({ ...params, type: 'spiral' });
+    expect(Array.from(irregular.positions)).not.toEqual(Array.from(spiral.positions));
+    expect(irregular.positions.every(Number.isFinite)).toBe(true);
+    expect(Math.max(...Array.from({ length: irregular.count }, (_, i) => Math.abs(irregular.positions[i * 3])))).toBeLessThan(params.radius * 3);
+  });
+
   it('respects the requested star count and clamps excessive values', () => {
     expect(generateGalaxy(DEFAULT_GALAXY_PARAMETERS).count).toBe(DEFAULT_GALAXY_PARAMETERS.starCount);
     const clamped = clampGalaxyParameters({ ...DEFAULT_GALAXY_PARAMETERS, starCount: 999999 });

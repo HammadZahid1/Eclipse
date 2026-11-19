@@ -78,6 +78,34 @@ function generateRing(params: GalaxyParameters, random: Random, write: StarWrite
   }
 }
 
+function generateIrregular(params: GalaxyParameters, random: Random, write: StarWriter): void {
+  const clusterCount = 3 + Math.round(params.randomness * 5);
+  const clusters = Array.from({ length: clusterCount }, () => ({
+    x: (random() - 0.5) * params.radius * 1.3,
+    y: (random() - 0.5) * params.radius * 0.22,
+    z: (random() - 0.5) * params.radius * 1.3,
+    scale: 0.12 + random() * 0.2,
+  }));
+
+  for (let i = 0; i < params.starCount; i += 1) {
+    const diffuse = random() < 0.25;
+    const cluster = clusters[Math.floor(random() * clusters.length)];
+    const spread = params.radius * cluster.scale * (1 + params.spread);
+    const x = diffuse ? (random() - 0.5) * params.radius * 1.6 : cluster.x + gaussian(random) * spread;
+    const y = diffuse ? (random() - 0.5) * params.radius * 0.3 : cluster.y + gaussian(random) * spread * 0.45;
+    const z = diffuse ? (random() - 0.5) * params.radius * 1.6 : cluster.z + gaussian(random) * spread;
+    write(
+      i,
+      x,
+      y,
+      z,
+      Math.floor(random() * 4),
+      0.55 + random() * 0.45,
+      0.5 + random() * 1.1,
+    );
+  }
+}
+
 /** Generates a galaxy entirely in memory from deterministic parameters. */
 export function generateGalaxy(input: GalaxyParameters): GalaxyData {
   const params = clampGalaxyParameters(input);
@@ -109,6 +137,7 @@ export function generateGalaxy(input: GalaxyParameters): GalaxyData {
 
   if (params.type === 'elliptical') generateElliptical(params, random, write);
   else if (params.type === 'ring') generateRing(params, random, write);
+  else if (params.type === 'irregular') generateIrregular(params, random, write);
   else generateSpiral(params, random, write);
 
   return { positions, colors, sizes, count };
