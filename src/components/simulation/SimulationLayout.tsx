@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { SimulationStatusBar } from './SimulationStatusBar';
+import { PausedOverlay } from './PausedOverlay';
 
 interface SimulationLayoutProps {
   scene: ReactNode;
@@ -7,6 +8,7 @@ interface SimulationLayoutProps {
   infoPanel: ReactNode;
   controlsPanel: ReactNode;
   status: { running: boolean; time: number; speed: number; detail?: string };
+  onResume?: () => void;
   className?: string;
 }
 
@@ -17,6 +19,7 @@ export function SimulationLayout({
   infoPanel,
   controlsPanel,
   status,
+  onResume,
   className = '',
 }: SimulationLayoutProps) {
   return (
@@ -24,6 +27,7 @@ export function SimulationLayout({
       <div className="flex min-h-[420px] flex-1 flex-col gap-3 lg:flex-row">
         <section className="relative min-h-[420px] flex-1 overflow-hidden rounded-xl border border-white/8 bg-void lg:min-h-0">
           <div className="absolute inset-0">{scene}</div>
+          <PausedOverlay visible={!status.running} onResume={onResume ?? (() => {})} />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,transparent_45%,rgba(3,4,10,0.55))]" />
           <div className="pointer-events-auto absolute left-3 top-3 z-10 max-w-[calc(100%-1.5rem)]">{toolbar}</div>
         </section>

@@ -30,6 +30,9 @@ export default function SolarSystemPage() {
   const handleReset = () => {
     reset();
     setResetToken((token) => token + 1);
+    setSelectedId(null);
+    setFocusId(null);
+    setRunning(true);
   };
 
   useSimulationShortcuts({
@@ -68,6 +71,7 @@ export default function SolarSystemPage() {
           />
         }
         status={{ running, time: displayTime, speed, detail: `${PLANETS.length} simulated bodies` }}
+        onResume={() => setRunning(true)}
         toolbar={
           <SimulationToolbar
             running={running}
