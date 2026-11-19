@@ -44,6 +44,8 @@ interface ProceduralParticlesProps {
   opacity?: number;
   rotationSpeed?: number;
   drifting?: boolean;
+  /** Freezes shader-time animation while keeping the particle field visible. */
+  animate?: boolean;
 }
 
 /** Buffer-based particle field with GPU-side twinkle and group-level rotation. */
@@ -58,6 +60,7 @@ export function ProceduralParticles({
   opacity = 0.85,
   rotationSpeed = 0.01,
   drifting = true,
+  animate = true,
 }: ProceduralParticlesProps) {
   const group = useRef<THREE.Group>(null);
   const material = useRef<THREE.ShaderMaterial>(null);
@@ -90,7 +93,7 @@ export function ProceduralParticles({
   );
 
   useFrame((state, delta) => {
-    if (material.current) material.current.uniforms.uTime.value = state.clock.elapsedTime;
+    if (material.current && animate) material.current.uniforms.uTime.value = state.clock.elapsedTime;
     if (group.current && drifting) group.current.rotation.y += delta * rotationSpeed;
   });
 

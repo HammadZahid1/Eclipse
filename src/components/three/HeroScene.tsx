@@ -1,13 +1,13 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useSettingsStore } from '@/state/settingsStore';
+import { useMotionPreference } from '@/hooks/useMotionPreference';
 import { StarField } from '@/components/particles/StarField';
 import { RenderCanvas } from './RenderCanvas';
 
 function HeroPlanet() {
   const planet = useRef<THREE.Mesh>(null);
-  const reducedMotion = useSettingsStore((state) => state.reducedMotion);
+  const reducedMotion = useMotionPreference();
 
   const geometry = useMemo(() => {
     const geo = new THREE.IcosahedronGeometry(1.45, 5);
@@ -50,8 +50,9 @@ function HeroPlanet() {
 
 function GlowBody() {
   const ref = useRef<THREE.Group>(null);
+  const reducedMotion = useMotionPreference();
   useFrame((state) => {
-    if (ref.current) {
+    if (ref.current && !reducedMotion) {
       const pulse = 1 + Math.sin(state.clock.elapsedTime * 0.9) * 0.04;
       ref.current.scale.setScalar(pulse);
     }
@@ -96,8 +97,8 @@ function OrbitPath() {
 }
 
 function CameraDrift() {
+  const reducedMotion = useMotionPreference();
   useFrame((state) => {
-    const reducedMotion = useSettingsStore.getState().reducedMotion;
     if (reducedMotion) return;
     const t = state.clock.elapsedTime * 0.08;
     state.camera.position.x = Math.sin(t) * 0.32;

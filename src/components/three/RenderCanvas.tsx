@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { useSettingsStore } from '@/state/settingsStore';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useMotionPreference } from '@/hooks/useMotionPreference';
 
 interface RenderCanvasProps {
   children: ReactNode;
@@ -27,7 +27,7 @@ export function RenderCanvas({
   onPointerMissed,
 }: RenderCanvasProps) {
   const renderQuality = useSettingsStore((state) => state.renderQuality);
-  const reducedMotion = useSettingsStore((state) => state.reducedMotion) || useReducedMotion();
+  const reducedMotion = useMotionPreference();
 
   return (
     <Canvas

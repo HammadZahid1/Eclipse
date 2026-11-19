@@ -1,4 +1,5 @@
 import { useSettingsStore } from '@/state/settingsStore';
+import { useMotionPreference } from '@/hooks/useMotionPreference';
 import { ProceduralParticles } from './ProceduralParticles';
 
 interface StarFieldProps {
@@ -16,7 +17,7 @@ export function StarField({
   rotationSpeed = 0.003,
 }: StarFieldProps) {
   const density = useSettingsStore((state) => state.particleDensity);
-  const reducedMotion = useSettingsStore((state) => state.reducedMotion);
+  const reducedMotion = useMotionPreference();
 
   return (
     <ProceduralParticles
@@ -29,6 +30,7 @@ export function StarField({
       opacity={0.75}
       rotationSpeed={rotationSpeed}
       drifting={!reducedMotion}
+      animate={!reducedMotion}
     />
   );
 }

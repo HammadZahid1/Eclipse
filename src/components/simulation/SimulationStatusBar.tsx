@@ -10,6 +10,9 @@ interface SimulationStatusBarProps {
 export function SimulationStatusBar({ running, time, speed, detail }: SimulationStatusBarProps) {
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-white/8 px-4 py-2.5 text-[10px] text-muted">
+      <span className="sr-only" role="status" aria-live="polite">
+        {running ? 'Simulation running' : 'Simulation paused'}
+      </span>
       <span className="flex items-center gap-2">
         <Activity size={12} className={running ? 'text-cyan' : 'text-muted'} />
         <span className="ecl-label">{running ? 'Simulation active' : 'Simulation paused'}</span>
