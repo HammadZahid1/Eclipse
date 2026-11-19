@@ -1,9 +1,9 @@
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { PLANETS } from '@/sim/solar/data';
-import { planetPosition } from '@/sim/solar/orbital';
+import { SolarOrbitEngine, type OrbitalBodyState } from '@/sim/solar/engine';
 import type { SimulationClock } from '@/sim/time';
 import { StarField } from '@/components/particles/StarField';
 import { RenderCanvas } from '@/components/three/RenderCanvas';
@@ -29,14 +29,17 @@ function SceneContents({
   showOrbits,
 }: SolarSystemSceneProps) {
   const planetGroups = useRef<Record<string, THREE.Group | null>>({});
+  const states = useRef<Record<string, OrbitalBodyState>>({});
+  const engine = useMemo(() => new SolarOrbitEngine(PLANETS), []);
 
   useFrame((_, delta) => {
     advance(delta, (_, time) => {
+      engine.sampleInto(time, states.current);
       PLANETS.forEach((planet) => {
         const group = planetGroups.current[planet.id];
-        if (!group) return;
-        const [x, y, z] = planetPosition(planet, time);
-        group.position.set(x, y, z);
+        const state = states.current[planet.id];
+        if (!group || !state) return;
+        group.position.set(state.x, state.y, state.z);
       });
     });
   });
