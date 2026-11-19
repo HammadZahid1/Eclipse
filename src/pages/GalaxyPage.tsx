@@ -3,6 +3,8 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Panel } from '@/components/ui/Panel';
 import { DataRow } from '@/components/ui/DataRow';
 import { RangeControl } from '@/components/ui/RangeControl';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import type { GalaxyType } from '@/types/simulation';
 import { SimulationLayout } from '@/components/simulation/SimulationLayout';
 import { SimulationToolbar } from '@/components/simulation/SimulationToolbar';
 import { GalaxyScene } from '@/components/scenes/galaxy/GalaxyScene';
@@ -87,6 +89,19 @@ export default function GalaxyPage() {
         }
         controlsPanel={
           <Panel title="Generation" eyebrow="Parameters">
+            <SegmentedControl
+              label="Galaxy type"
+              value={parameters.type}
+              onChange={(type) => updateParameters({ type: type as GalaxyType })}
+              options={[
+                { value: 'spiral', label: 'Spiral' },
+                { value: 'elliptical', label: 'Elliptical' },
+                { value: 'ring', label: 'Ring' },
+                { value: 'irregular', label: 'Irregular' },
+              ]}
+              columns={2}
+            />
+            <div className="my-5" />
             <RangeControl
               label="Star count"
               value={parameters.starCount}
