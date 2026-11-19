@@ -9,6 +9,7 @@ interface RenderCanvasProps {
   className?: string;
   /** Pauses the render loop when the simulation is stopped. */
   paused?: boolean;
+  onPointerMissed?: () => void;
 }
 
 const dprByQuality = {
@@ -23,6 +24,7 @@ export function RenderCanvas({
   camera = { position: [0, 1.5, 7], fov: 45, near: 0.1, far: 400 },
   className = '',
   paused = false,
+  onPointerMissed,
 }: RenderCanvasProps) {
   const renderQuality = useSettingsStore((state) => state.renderQuality);
   const reducedMotion = useSettingsStore((state) => state.reducedMotion) || useReducedMotion();
@@ -35,6 +37,7 @@ export function RenderCanvas({
       camera={camera}
       gl={{ antialias: renderQuality !== 'low', powerPreference: 'high-performance', alpha: false }}
       onCreated={({ gl }) => gl.setClearColor('#03040A', 1)}
+      onPointerMissed={onPointerMissed}
     >
       <Suspense fallback={null}>{children}</Suspense>
     </Canvas>

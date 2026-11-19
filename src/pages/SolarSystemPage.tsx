@@ -8,6 +8,7 @@ import { SolarSystemScene } from '@/components/scenes/solar/SolarSystemScene';
 import { useSimulationClock } from '@/hooks/useSimulationClock';
 import { useFullscreen } from '@/hooks/useFullscreen';
 import { useSettingsStore } from '@/state/settingsStore';
+import { PlanetSelector } from '@/components/simulation/PlanetSelector';
 import { PLANETS, SOLAR_SYSTEM_BOUNDS } from '@/sim/solar/data';
 import type { SimulationSpeed } from '@/lib/constants';
 
@@ -46,6 +47,7 @@ export default function SolarSystemPage() {
             selectedId={selectedId}
             onSelect={setSelectedId}
             showOrbits={showOrbits}
+            onClearSelection={() => setSelectedId(null)}
           />
         }
         status={{ running, time: displayTime, speed, detail: `${PLANETS.length} simulated bodies` }}
@@ -78,12 +80,15 @@ export default function SolarSystemPage() {
           </Panel>
         }
         controlsPanel={
-          <Panel title="Navigation" eyebrow="Controls">
-            <ul className="space-y-2 text-xs leading-relaxed text-muted">
+          <Panel title="Body selection" eyebrow="Controls">
+            <PlanetSelector
+              selectedId={selectedId}
+              onSelect={(id) => setSelectedId(id === '' ? null : id)}
+            />
+            <ul className="mt-5 space-y-2 border-t border-white/8 pt-4 text-xs leading-relaxed text-muted">
               <li>Drag — orbit the camera</li>
               <li>Scroll / pinch — zoom</li>
               <li>Right-drag — pan</li>
-              <li>Toolbar — playback, speed and views</li>
             </ul>
           </Panel>
         }

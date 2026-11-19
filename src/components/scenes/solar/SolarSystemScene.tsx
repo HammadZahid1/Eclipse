@@ -18,6 +18,7 @@ interface SolarSystemSceneProps {
   selectedId: string | null;
   onSelect: (id: string) => void;
   showOrbits: boolean;
+  onClearSelection: () => void;
 }
 
 function SceneContents({
@@ -83,7 +84,10 @@ function SceneContents({
 
 export function SolarSystemScene(props: SolarSystemSceneProps) {
   return (
-    <RenderCanvas camera={{ position: [0, 11, 19], fov: 48, far: 400 }}>
+    <RenderCanvas
+      camera={{ position: [0, 11, 19], fov: 48, far: 400 }}
+      onPointerMissed={props.onClearSelection}
+    >
       <SceneContents {...props} />
     </RenderCanvas>
   );
