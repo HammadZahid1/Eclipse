@@ -9,6 +9,7 @@ import { StarField } from '@/components/particles/StarField';
 import { RenderCanvas } from '@/components/three/RenderCanvas';
 import { Star } from './Star';
 import { Planet } from './Planet';
+import { OrbitPath } from './OrbitPath';
 
 interface SolarSystemSceneProps {
   clock: SimulationClock;
@@ -16,9 +17,17 @@ interface SolarSystemSceneProps {
   resetToken: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  showOrbits: boolean;
 }
 
-function SceneContents({ clock, advance, resetToken, selectedId, onSelect }: SolarSystemSceneProps) {
+function SceneContents({
+  clock,
+  advance,
+  resetToken,
+  selectedId,
+  onSelect,
+  showOrbits,
+}: SolarSystemSceneProps) {
   const planetGroups = useRef<Record<string, THREE.Group | null>>({});
 
   useFrame((_, delta) => {
@@ -37,6 +46,14 @@ function SceneContents({ clock, advance, resetToken, selectedId, onSelect }: Sol
       <StarField count={900} seed="solar-system" radius={110} rotationSpeed={0.002} />
       <ambientLight intensity={0.22} />
       <Star />
+      {PLANETS.map((planet) => (
+        <OrbitPath
+          key={`orbit-${planet.id}`}
+          planet={planet}
+          selected={selectedId === planet.id}
+          visible={showOrbits}
+        />
+      ))}
       {PLANETS.map((planet) => (
         <Planet
           key={`${planet.id}-${resetToken}`}

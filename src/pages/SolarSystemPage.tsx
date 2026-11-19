@@ -45,6 +45,7 @@ export default function SolarSystemPage() {
             resetToken={resetToken}
             selectedId={selectedId}
             onSelect={setSelectedId}
+            showOrbits={showOrbits}
           />
         }
         status={{ running, time: displayTime, speed, detail: `${PLANETS.length} simulated bodies` }}
